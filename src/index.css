@@ -1,0 +1,112 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-deep: #0F1113;
+    --bg-panel: #15171A;
+    --accent-ember: #FF6B35;
+    --accent-soft: #FFB86B;
+    --accent-gold: #D4AF37;
+    --text-muted: #9AA3AD;
+    --text-primary: #E6EEF3;
+    --shadow-highlight: #071012;
+  }
+
+  body {
+    @apply bg-[#0F1113] text-[#E6EEF3] font-sans;
+  }
+
+  *::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: #15171A;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: #FF6B35;
+    border-radius: 4px;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: #FFB86B;
+  }
+}
+
+@layer utilities {
+  .text-gradient-ember {
+    @apply bg-gradient-to-r from-[#FF6B35] to-[#FFB86B] bg-clip-text text-transparent;
+  }
+
+  .glow-ember {
+    box-shadow: 0 0 20px rgba(255, 107, 53, 0.5);
+  }
+
+  .panel-dark {
+    @apply bg-[#15171A] rounded-lg border border-[#2a2d33];
+  }
+
+  .btn-primary {
+    @apply bg-gradient-to-r from-[#FF6B35] to-[#FFB86B] text-white font-semibold py-3 px-6 rounded-lg
+           hover:shadow-lg hover:shadow-[#FF6B35]/50 transition-all duration-300 active:scale-95;
+  }
+
+  .btn-secondary {
+    @apply bg-[#15171A] text-[#E6EEF3] font-semibold py-3 px-6 rounded-lg border border-[#2a2d33]
+           hover:border-[#FF6B35] transition-all duration-300 active:scale-95;
+  }
+}
+
+@keyframes xp-float {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-30px) scale(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-60px) scale(0.8);
+  }
+}
+
+@keyframes level-up-burst {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(255, 107, 53, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(255, 107, 53, 0.6);
+  }
+}
+
+.animate-xp-float {
+  animation: xp-float 1.5s ease-out forwards;
+}
+
+.animate-level-up {
+  animation: level-up-burst 1s ease-out forwards;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
