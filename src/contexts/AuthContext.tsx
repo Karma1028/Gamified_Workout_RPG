@@ -124,13 +124,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signIn = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: window.location.origin,
-      },
-    });
-    if (error) console.error('Error signing in:', error);
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+        },
+      });
+      if (error) {
+        console.error('Error signing in:', error);
+        alert(`Sign-in error: ${error.message}`);
+      }
+    } catch (e) {
+      console.error('Unexpected error during sign-in:', e);
+      alert('An unexpected error occurred during sign-in. Please try again.');
+    }
   };
 
   const signOut = async () => {

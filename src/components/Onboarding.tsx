@@ -41,6 +41,7 @@ const EQUIPMENT = ['Bodyweight', 'Dumbbells', 'Barbell', 'Machines', 'Cables', '
 export function Onboarding({ onComplete }: { onComplete: () => void }) {
   const { user, refreshUser } = useAuth();
   const [step, setStep] = useState(1);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<Partial<OnboardingData>>({
     goals: [],
     experience_level: 'Beginner',
@@ -65,22 +66,37 @@ export function Onboarding({ onComplete }: { onComplete: () => void }) {
   };
 
   const handleSubmit = async () => {
-    if (!user) return;
+    if (!user) {
+      setError('User not authenticated');
+      return;
+    }
     setLoading(true);
+    setError(null);
 
-    await supabase.from('onboarding_data').upsert({
-      user_id: user.id,
-      ...formData,
-    });
+    try {
+      const { error: onboardError } = await supabase.from('onboarding_data').upsert({
+        user_id: user.id,
+        ...formData,
+      });
 
-    await supabase
-      .from('users')
-      .update({ role: selectedRole })
-      .eq('id', user.id);
+      if (onboardError) throw onboardError;
 
-    await refreshUser();
-    setLoading(false);
-    onComplete();
+      const { error: userError } = await supabase
+        .from('users')
+        .update({ role: selectedRole })
+        .eq('id', user.id);
+
+      if (userError) throw userError;
+
+      await refreshUser();
+      setLoading(false);
+      onComplete();
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred during onboarding';
+      setError(errorMessage);
+      setLoading(false);
+      console.error('Onboarding error:', err);
+    }
   };
 
   const renderStep = () => {
@@ -306,6 +322,18 @@ export function Onboarding({ onComplete }: { onComplete: () => void }) {
         </div>
 
         <div className="panel-dark p-8">
+          {error && (
+            <div className="mb-6 p-4 bg-red-500/10 border border-red-500 rounded-lg">
+              <p className="text-red-500 text-sm">{error}</p>
+              <button
+                onClick={() => setError(null)}
+                className="text-xs text-red-500 underline mt-2"
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
+
           {renderStep()}
 
           <div className="flex justify-between mt-8">

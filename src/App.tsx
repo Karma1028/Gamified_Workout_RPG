@@ -7,6 +7,7 @@ import { supabase } from './lib/supabase';
 function AppContent() {
   const { user, loading, signIn } = useAuth();
   const [hasOnboarded, setHasOnboarded] = useState<boolean | null>(null);
+  const [signInError, setSignInError] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -14,11 +15,31 @@ function AppContent() {
     }
   }, [user]);
 
+  useEffect(() => {
+    const handleAuthCallback = async () => {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get('code');
+      const error = params.get('error');
+
+      if (error) {
+        setSignInError(`Authentication error: ${error}`);
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+
+      if (code) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    };
+
+    handleAuthCallback();
+  }, []);
+
   const checkOnboarding = async () => {
+    if (!user) return;
     const { data } = await supabase
       .from('onboarding_data')
       .select('*')
-      .eq('user_id', user?.id)
+      .eq('user_id', user.id)
       .maybeSingle();
 
     setHasOnboarded(!!data);
@@ -48,6 +69,18 @@ function AppContent() {
           </div>
 
           <div className="panel-dark p-8 mb-6">
+            {signInError && (
+              <div className="mb-4 p-3 bg-red-500/10 border border-red-500 rounded-lg text-red-500 text-sm">
+                {signInError}
+                <button
+                  onClick={() => setSignInError(null)}
+                  className="block mt-2 text-xs underline"
+                >
+                  Dismiss
+                </button>
+              </div>
+            )}
+
             <div className="space-y-4 text-left mb-6">
               <div className="flex items-start">
                 <div className="text-2xl mr-3">💪</div>
@@ -75,6 +108,15 @@ function AppContent() {
             <button onClick={signIn} className="btn-primary w-full">
               Sign in with Google
             </button>
+
+            <div className="mt-4 p-3 bg-[#0F1113] rounded-lg text-xs text-[#9AA3AD]">
+              <p className="mb-2">
+                <strong>Note:</strong> Google OAuth must be configured in Supabase for sign-in to work.
+              </p>
+              <p className="text-xs">
+                See README.md for setup instructions.
+              </p>
+            </div>
           </div>
 
           <div className="text-xs text-[#9AA3AD]">
